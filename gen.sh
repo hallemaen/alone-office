@@ -16,7 +16,7 @@ O = MyCompany
 OU = MyDivision
 CN = $1
 [v3_req]
-keyUsage = keyEncipherment, dataEncipherment
+#keyUsage = keyEncipherment, dataEncipherment
 extendedKeyUsage = serverAuth
 subjectAltName = @alt_names
 [alt_names]
