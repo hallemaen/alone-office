@@ -1819,7 +1819,18 @@ function createWasm() {
 
 
   function instantiateArrayBuffer(receiver) {
-    return getBinaryPromise().then(function(binary) {
+    return getBinaryPromise().then(function (binary) {
+      return crypto.subtle.digest('SHA-256', binary).then(function (hashBuffer) {
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');   
+        console.log('x2t wasm fingerprint', hashHex);
+        if (hashHex != "43dbe8df17dd05f545336b7844926f702e72ec052f44c47c6d976c33620ba1e3") {
+          console.log('x2t wasm failed integrity check');
+          return ""; 
+        }
+        return binary;
+      })
+    }).then(function(binary) {
       return WebAssembly.instantiate(binary, info);
     }).then(receiver, function(reason) {
       err('failed to asynchronously prepare wasm: ' + reason);

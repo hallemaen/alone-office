@@ -8,56 +8,7 @@
     <meta name="keywords" content="" />
     <link rel="icon" href="resources/img/favicon.ico" type="image/x-icon" />
 
-    <script>
-      const b64toBlob = (b64Data, contentType='', sliceSize=512) => {
-        const byteCharacters = atob(b64Data);
-        const byteArrays = [];
-        for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-          const slice = byteCharacters.slice(offset, offset + sliceSize);
-          const byteNumbers = new Array(slice.length);
-          for (let i = 0; i < slice.length; i++) {
-            byteNumbers[i] = slice.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          byteArrays.push(byteArray);
-        }
-        const blob = new Blob(byteArrays, {type: contentType});
-        return blob;
-      }
-      window.addEventListener('message', function (msg) {
-        if (msg.source !== parent) { return; }
-        if (msg.data && msg.data.startsWith('data:')) {
-          try {
-            let blob = b64toBlob(msg.data.split(',')[1]);
-            var url = URL.createObjectURL(blob);
-            msg.source.postMessage(url, '*');
-            console.log(blob);
-          } catch (e) {
-            console.log(e)
-          }
-          return;
-        }
-        if (msg.data && msg.data.startsWith('{')) {
-          let obj = {};
-          try {
-            obj = JSON.parse(msg.data); 
-          } catch (e) {
-            console.log(e);
-          }
-          if (obj._do == "save") {
-            let x = (window.editor || window.editorCell).asc_nativeGetFile();
-            msg.source.postMessage("save:" + x, '*');
-          }
-        }
-        
-        if (msg.data == 'save!') {
-          //let x = (window.editor || window.editorCell).asc_nativeGetFile();
-          //console.log(x);
-        }
-      });
-    </script>
-
-    <!-- splash        
+    <!-- splash -->        
 
     <style type="text/css">
         .loadmask {
@@ -225,8 +176,6 @@
             100%    { top:100px; background: #55bce6; }
         }
     </style>
-    
-    -->
 
     <script>
         var userAgent = navigator.userAgent.toLowerCase(),
@@ -306,7 +255,6 @@
         else if ( lang == 'vi') loading = 'Đang tải...';
         else if ( lang == 'zh') loading = '加载中...';
 
-        /*
         if (!stopLoading)
             document.write(
                 '<div id="loading-mask" class="loadmask">' +
@@ -322,7 +270,6 @@
                             '<div class="loader-page-text-loading">' + loading + '</div>' +
                         '</div>' +
                 '</div>');
-          */ 
     </script>
 
     <link rel="stylesheet" type="text/css" href="../../../apps/presentationeditor/main/resources/css/app.css">

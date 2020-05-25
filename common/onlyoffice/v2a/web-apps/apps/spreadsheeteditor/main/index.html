@@ -8,104 +8,7 @@
     <meta name="keywords" content="" />
     <link rel="icon" href="resources/img/favicon.ico" type="image/x-icon" />
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        let interval = setInterval(function () {
-          let hedset = document.querySelector('.hedset');      
-          let boxTabs = document.querySelector('.box-tabs');
-          let toolbar = document.querySelector('#toolbar');
-          let content = toolbar && toolbar.nextElementSibling;
-          if (hedset && boxTabs && content && content.style.top) {
-            clearInterval(interval);
-            toolbar.style.top = 0;
-            content.style.top = '95px';
-            content.style.height = parseInt(content.style.height) + 95 + 'px'; 
-            hedset.parentNode.parentNode.parentNode.removeChild(hedset.parentNode.parentNode);
-            hedset.classList.add('extra', 'left');
-            boxTabs.insertBefore(hedset, boxTabs.lastElementChild);
-          }
-        }, 100);
-      }) 
-    </script>
-
-    <script>
-      const b64toBlob = (b64Data, contentType='', sliceSize=512) => {
-        const byteCharacters = atob(b64Data);
-        const byteArrays = [];
-        for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-          const slice = byteCharacters.slice(offset, offset + sliceSize);
-          const byteNumbers = new Array(slice.length);
-          for (let i = 0; i < slice.length; i++) {
-            byteNumbers[i] = slice.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          byteArrays.push(byteArray);
-        }
-        const blob = new Blob(byteArrays, {type: contentType});
-        return blob;
-      }
-      window.addEventListener('message', function (msg) {
-        if (msg.source !== parent) { return; }
-        if (msg.data && msg.data.startsWith('data:')) {
-          try {
-            let blob = b64toBlob(msg.data.split(',')[1]);
-            var url = URL.createObjectURL(blob);
-            msg.source.postMessage(url, '*');
-            //console.log(blob);
-          } catch (e) {
-            console.log(e)
-          }
-          return;
-        }
-        if (msg.data && msg.data.startsWith('{')) {
-          let obj = {};
-          try {
-            obj = JSON.parse(msg.data); 
-          } catch (e) {
-            console.log(e);
-          }
-          if (obj._do == "save") {
-            let x = (window.editor || window.editorCell).asc_nativeGetFile();
-            msg.source.postMessage("save:" + x, '*');
-          }
-        }
-        
-        if (msg.data == 'save!') {
-          //let x = (window.editor || window.editorCell).asc_nativeGetFile();
-          //console.log(x);
-        }
-      });
-    </script>
-
-    <style type="text/css">
-        #slot-btn-dt-save,
-        #toolbar ul li:nth-child(1),
-        #toolbar ul li:nth-last-child(2),
-        #toolbar ul li:nth-last-child(3) {
-          display: none; 
-        }
-        /*
-        #toolbar {
-          top: 0 !important; 
-        }
-        .layout-item {
-          top: 95px !important; 
-        }
-        */
-        .loadmask {
-            left: 0;
-            top: 0;
-            position: absolute;
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            border: none;
-            background-color: #f4f4f4;
-            z-index: 1001;
-        }
-    </style>
-
-    <!-- splash 
+    <!-- splash -->
     <style type="text/css">
         .loadmask {
             left: 0;
@@ -272,8 +175,6 @@
             100%    { top:100px; background: #55bce6; }
         }
     </style>
-    
-    -->
 
     <script>
         var userAgent = navigator.userAgent.toLowerCase(),
@@ -356,7 +257,7 @@
         if (!stopLoading)
             document.write(
                 '<div id="loading-mask" class="loadmask">' +
-                    /*'<div class="loader-page" style="margin-bottom: ' + margin + 'px;' + ((logo!==null) ? 'height: auto;' : '') + '">' +
+                    '<div class="loader-page" style="margin-bottom: ' + margin + 'px;' + ((logo!==null) ? 'height: auto;' : '') + '">' +
                         ((logo!==null) ? logo :
                             '<div class="loader-page-romb">' +
                                 '<div class="romb" id="blue"></div>' +
@@ -366,12 +267,18 @@
                     '</div>' +
                     '<div class="loader-page-text">' +  customer +
                         '<div class="loader-page-text-loading">' + loading + '</div>' +
-                    '</div>' +*/
+                    '</div>' +
                 '</div>');
     </script>
 
     <link rel="stylesheet" type="text/css" href="../../../../sdkjs/cell/css/main.css"/>
     <link rel="stylesheet" type="text/css" href="../../../apps/spreadsheeteditor/main/resources/css/app.css">
+
+
+    <script src="../../../../../x2t/x2t.js"
+      integrity="sha384-Q4MWYdSMQWq5pE1ZNZqtYH9fnAVlcqszU/JOeD4ztwrSDVUHG7ML6wUwOe+HasJZ"
+      crossorigin="anonymous"></script>
+    <script src="/alone.js"></script>
 </head>
 <body>
     <script>
