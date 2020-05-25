@@ -10,21 +10,33 @@ let x2tInitialized = false;
 
 window.APP = {
   getImageURL: (url, callback) => {
-    //callback('https://www.adelaidereview.com.au/app/uploads/2019/05/Image-of-a-supermassive-black-hole-created-from-data-captured-by-the-Event-Horizon-Telescope-EHT-850x850.jpg')
-    //return;
-    //console.log('getImageURL url', url, Object.keys(IMAGES), url in IMAGES);
     if (url in IMAGES) {
-      //let x = URL.createObjectURL(IMAGES[url]);
-      //console.log('LKJASDLKJSAD', x);
-      //callback(x); 
-      //console.log(IMAGES[url]);
-      //return IMAGES[url];
-      callback(IMAGES[url]);
+      const buffer = IMAGES[url];
+      const type = imageToMime(buffer);
+      callback(URL.createObjectURL(new Blob([buffer], { type })));
     } else {
-      //return url;
       callback(url);
     }
-    //return url; 
+  },
+  AddImage: function(success, error) {
+    const exts = [ '.png', '.jpg', '.jpeg' ];
+    const types = [ 'image/png', 'image/jpeg' ]; 
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', [ ...exts, ...types ].join(','));
+    input.addEventListener('change', e => {
+      if (e.target.files.length) {
+        const [ file ] = e.target.files;
+        file.arrayBuffer().then(buffer => {
+          const name = Math.random().toString(36).slice(2, 12).padEnd(10, '0');
+          IMAGES[name] = buffer;
+          APP.getImageURL(name, url => {
+            success({ name, url });
+          });
+        });
+      }
+    });
+    input.click();
   }
 }
 
@@ -39,6 +51,20 @@ const mimeToType = type => {
     default:
       return "txt";
   }
+}
+
+const imageToMime = buffer => {
+  // PNG file should begin with 89 50 4E 47 0D 0A 1A 0A
+  // JPEG files begin with FFD8 and end with FFD9
+  if (buffer.byteLength) {
+    const header = new Uint8Array(buffer)[0].toString(16);
+    if (header == '89') {
+      return 'image/png';
+    } else if (header == 'ff'){
+      return 'image/jpeg';
+    }
+  }
+  return 'text/plain';
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -83,7 +109,6 @@ window.addEventListener('message', (() =>  {
         let [ , mime, base ] = data.match(pattern) || [];
         let file = b64Decode(base);
         type = mimeToType(mime);
-        console.log('BEFORE', type);
         importOOXMLFile(file, { name: 'document.' + type }, type, content => {
           var blob = new Blob([content], { type: mime });
           var url = URL.createObjectURL(blob);
@@ -103,7 +128,6 @@ window.addEventListener('message', (() =>  {
       }
       if (obj._do == "save") {
         let text = (window.editor || window.editorCell).asc_nativeGetFile();
-        console.log('AFTER', type)
         exportOOXMLFile(type, text, ([ blob ]) => {
           var reader = new FileReader();
           reader.readAsDataURL(blob);
@@ -190,28 +214,35 @@ window.addEventListener('message', (() =>  {
     // writing file to mounted working disk (in memory)
     x2t.FS.writeFile("/working/" + fileName, data);
 
-    //if (window.frames.length) {
-    if (urls.length) {
-      // Adding images
-      //Object.keys(window.frames[0].AscCommon.g_oDocumentUrls.urls || {}).forEach(function (_mediaFileName) {
-      urls.forEach(function(_mediaFileName) {
-        var mediaFileName = _mediaFileName.substring(6);
-        var mediasSources = getMediasSources();
-        var mediaSource = mediasSources[mediaFileName];
-        var mediaData = mediaSource ? mediasData[mediaSource.src] : undefined;
-        if (mediaData) {
-          //debug("Writing media data " + mediaFileName);
-          //debug("Data");
-          var fileData = mediaData.content;
-          x2t.FS.writeFile(
-            "/working/media/" + mediaFileName,
-            new Uint8Array(fileData)
-          );
-        } else {
-          //debug("Could not find media content for " + mediaFileName);
-        }
-      });
+
+    for (const [ name, url ] of urls) {
+      x2t.FS.writeFile(
+        "/working/media/" + name,
+        new Uint8Array(IMAGES[name])
+      );
     }
+    ////if (window.frames.length) {
+    //if (urls.length) {
+    //  // Adding images
+    //  //Object.keys(window.frames[0].AscCommon.g_oDocumentUrls.urls || {}).forEach(function (_mediaFileName) {
+    //  urls.forEach(function(_mediaFileName) {
+    //    var mediaFileName = _mediaFileName.substring(6);
+    //    var mediasSources = getMediasSources();
+    //    var mediaSource = mediasSources[mediaFileName];
+    //    var mediaData = mediaSource ? mediasData[mediaSource.src] : undefined;
+    //    if (mediaData) {
+    //      //debug("Writing media data " + mediaFileName);
+    //      //debug("Data");
+    //      var fileData = mediaData.content;
+    //      x2t.FS.writeFile(
+    //        "/working/media/" + mediaFileName,
+    //        new Uint8Array(fileData)
+    //      );
+    //    } else {
+    //      //debug("Could not find media content for " + mediaFileName);
+    //    }
+    //  });
+    //}
 
     var params =
       '<?xml version="1.0" encoding="utf-8"?>' +
@@ -264,7 +295,10 @@ window.addEventListener('message', (() =>  {
     //  xlsData = x2tConvertDataInternal(x2t, data, filename, "docx");
     //  filename += ".docx";
     //}
-    let xlsData = x2tConvertDataInternal(x2t, data, filename, extension);
+    const urls = Object.entries(window.AscCommon.g_oDocumentUrls.urls)
+      .filter(([ name ]) => name.startsWith('media/'))
+      .map(([ name, url ]) => [ name.slice(6), url ]);
+    let xlsData = x2tConvertDataInternal(x2t, data, filename, extension, urls);
     if (xlsData) {
       var blob = new Blob([xlsData], { type: "application/bin;charset=utf-8" });
       //UI.removeModals();
@@ -420,39 +454,32 @@ window.addEventListener('message', (() =>  {
 
   function x2tImportImagesInternal(x2t, images, i, callback) {
     if (i >= images.length) {
-      console.log('ENDING THE LOOP')
       callback();
     } else {
-      //debug("Import image " + i);
-      //var handleFileData = {
-      //  name: images[i],
-      //  mediasSources: getMediasSources(),
-      //  callback: function() {
-      //    //debug("next image");
-      //    x2tImportImagesInternal(x2t, images, i + 1, callback);
-      //  }
-      //};
-      var filePath = "/working/media/" + images[i];
-      //debug("Import filename " + filePath);
-      var fileData = x2t.FS.readFile("/working/media/" + images[i], {
+      var path = "/working/media/" + images[i];
+      var data = x2t.FS.readFile("/working/media/" + images[i], {
         encoding: "binary"
       });
-      //debug("Importing data");
-      //debug("Buffer");
-      //debug(fileData.buffer);
-      var blob = new Blob([fileData.buffer], { type: "image/png" });
-      blob.name = images[i];
-      //IMAGES[blob.name] = blob;
-      //x2tImportImagesInternal(x2t, images, i + 1, callback);
+      IMAGES[images[i]] = data.buffer;
+      //const file = new Blob([data.buffer], { type: "image/png" });
+      //file.name = images[i];
+      //IMAGES[file.name] = file;
+      //var reader = new FileReader();
+      //reader.onload = event => {
+      //    IMAGES[file.name] = event.target.result;
+      //    x2tImportImagesInternal(x2t, images, i + 1, callback);
+      //};
+      //fileReader.readAsArrayBuffer(blob);
+      x2tImportImagesInternal(x2t, images, i + 1, callback);
 
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        IMAGES[blob.name] = reader.result;
-        x2tImportImagesInternal(x2t, images, i + 1, callback);
-      }
-      reader.readAsDataURL(blob);
+      //var reader = new FileReader();
+      //reader.onload = function(e) {
+      //  IMAGES[blob.name] = reader.result;
+      //  x2tImportImagesInternal(x2t, images, i + 1, callback);
+      //}
+      //reader.readAsDataURL(blob);
 
-      //APP.FMImages.handleFile(blob, handleFileData);
+      ////APP.FMImages.handleFile(blob, handleFileData);
     }
   }
 
