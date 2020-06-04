@@ -323,6 +323,14 @@
     <script data-main="app" src="../../../vendor/requirejs/require.js"></script>
 
     <script>
+      function removeAddImageByUrl(){
+        const imageInsert = document.getElementById('tlbtn-insertimage')
+        imageInsert.childNodes[1].childNodes[1].remove()
+
+        const byUrlElement =  document.getElementById('image-button-from-url')
+        byUrlElement.remove();
+      }
+
       function governator(){
         const fileElement = document.querySelector("[data-tab=file][data-title=File]")
         const collaborationElement = document.querySelector("[data-tab=review][data-title=Collaboration]")
@@ -340,6 +348,7 @@
           handBurgerElement.remove();
           aboutElement.remove()
           watermarkElement.parentElement.remove();
+          removeAddImageByUrl()
         }
       }
       governator();
