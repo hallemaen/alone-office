@@ -325,6 +325,10 @@
     <script>
       function removeAddImageByUrl(){
         const imageInsert = document.getElementById('tlbtn-insertimage')
+        if (!imageInsert.childNodes[1]){
+          setTimeout(removeAddImageByUrl, 100);
+          return;
+        }
         imageInsert.childNodes[1].childNodes[1].remove()
 
         const byUrlElement =  document.getElementById('image-button-from-url')
