@@ -320,5 +320,41 @@
     <div id="viewport"></div>
 
     <script data-main="app" src="../../../vendor/requirejs/require.js"></script>
+    <script>
+      function removeAddImageByUrl(){
+        const imageInsert = document.getElementById('tlbtn-insertimage')
+      
+        if (!imageInsert.childNodes[1]){
+          setTimeout(removeAddImageByUrl, 100);
+          return;
+        }
+        imageInsert.childNodes[1].childNodes[1].remove()
+
+        const byUrlElement =  document.getElementById('image-button-from-url')
+        byUrlElement.remove();
+      }
+
+      function governator(){
+        const fileElement = document.querySelector("[data-tab=file][data-title=File]")
+        const collaborationElement = document.querySelector("[data-tab=review][data-title=Collaboration]")
+        const saveElement = document.getElementById('slot-btn-dt-save');
+        const handBurgerElement = document.getElementById('slot-btn-options')
+        const aboutElement = document.getElementById('left-btn-about');
+    
+        if (!fileElement){
+          setTimeout(governator, 100)
+        } else {
+          collaborationElement.parentElement.remove();
+          fileElement.parentElement.remove();
+          saveElement.remove();
+          handBurgerElement.remove();
+          aboutElement.remove()
+          removeAddImageByUrl()
+        }
+      }
+      governator();
+    </script>
+
+
 </body>
 </html>
