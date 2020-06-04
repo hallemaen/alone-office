@@ -322,5 +322,26 @@
     <div id="viewport"></div>
     <script data-main="app" src="../../../vendor/requirejs/require.js"></script>
 
+    <script>
+      function governator(){
+        const fileElement = document.querySelector("[data-tab=file][data-title=File]")
+        const collaborationElement = document.querySelector("[data-tab=review][data-title=Collaboration]")
+        const saveElement = document.getElementById('slot-btn-dt-save');
+        const handBurgerElement = document.getElementById('slot-btn-options')
+        const aboutElement = document.getElementById('left-btn-about');
+    
+        if (!fileElement){
+          setTimeout(governator, 100)
+        } else {
+          collaborationElement.parentElement.remove();
+          fileElement.parentElement.remove();
+          saveElement.remove();
+          handBurgerElement.remove();
+          aboutElement.remove()
+        }
+      }
+      governator();
+    </script>
+
 </body>
 </html>
