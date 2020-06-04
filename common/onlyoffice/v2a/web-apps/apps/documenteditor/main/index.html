@@ -329,6 +329,7 @@
         const saveElement = document.getElementById('slot-btn-dt-save');
         const handBurgerElement = document.getElementById('slot-btn-options')
         const aboutElement = document.getElementById('left-btn-about');
+        const watermarkElement = document.getElementById('slot-btn-watermark');
     
         if (!fileElement){
           setTimeout(governator, 100)
@@ -338,6 +339,7 @@
           saveElement.remove();
           handBurgerElement.remove();
           aboutElement.remove()
+          watermarkElement.parentElement.remove();
         }
       }
       governator();
