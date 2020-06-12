@@ -5,6 +5,7 @@ window.Module._runtimeInitialized = new Promise(
 );
 
 const IMAGES = {};
+const ONE_MB = 1000 * 1000;
 
 let x2tInitialized = false;
 
@@ -28,11 +29,16 @@ window.APP = {
       if (e.target.files.length) {
         const [ file ] = e.target.files;
         file.arrayBuffer().then(buffer => {
-          const name = Math.random().toString(36).slice(2, 12).padEnd(10, '0');
-          IMAGES[name] = buffer;
-          APP.getImageURL(name, url => {
-            success({ name, url });
-          });
+          if (buffer.byteLength < ONE_MB){
+            const name = Math.random().toString(36).slice(2, 12).padEnd(10, '0');
+            IMAGES[name] = buffer;
+            APP.getImageURL(name, url => {
+              success({ name, url });
+            });
+          }else{
+            alert("Maximum image size (1MB) exceed");
+            error("Maximum image size (1MB) exceed");
+          }
         });
       }
     });
