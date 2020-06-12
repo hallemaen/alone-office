@@ -1,5 +1,6 @@
 const https = require('https');
 const fs = require('fs');
+const path = require('path');
 
 const options = {
   key: fs.readFileSync('localhost.key'),
@@ -38,9 +39,10 @@ https.createServer(options, (req, res) => {
   if (url.endsWith(".css")) {
     contentType = "text/css"; 
   }
-  console.log('serve', __dirname + url);
+  const filePath = path.join(__dirname, "html", url);
+  console.log('serve', filePath);
   try {
-    content = fs.readFileSync(__dirname + url);  
+    content = fs.readFileSync(filePath);  
   } catch (e) {
     status = 404;
   }

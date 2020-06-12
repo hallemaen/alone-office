@@ -1,0 +1,6 @@
+gen.sh
+Dockerfile
+docker-compose.yml
+LICENSE.txt
+README.md
+server.js

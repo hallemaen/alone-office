@@ -1,0 +1,38 @@
+---
+version: '3.7'
+services:
+
+  www:
+    image: www
+    restart: always
+    build:
+      context: .
+    labels:
+      - "traefik.http.services.www.loadbalancer.server.port=80"
+      - "traefik.http.routers.www.service=www"
+      - "traefik.http.routers.www.entrypoints=https"
+      - "traefik.http.routers.www.rule=Host(`aloneoffice.com`)"
+      - "traefik.http.routers.www.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.www.middlewares=https-redirect"
+
+  traefik:
+    image: traefik:2.2.1
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /data/acme.json:/acme.json
+    labels:
+      # HTTPS redirect
+      - "traefik.http.routers.https-redirect.rule=HostRegexp(`{any:.*}`)"
+      - "traefik.http.routers.https-redirect.middlewares=https-redirect"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+    command:
+      - "--providers.docker=true"
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.https.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=jonas@hyker.io"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/acme.json"
