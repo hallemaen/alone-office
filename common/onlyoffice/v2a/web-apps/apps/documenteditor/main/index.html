@@ -339,6 +339,7 @@
         const fileElement = document.querySelector("[data-tab=file][data-title=File]")
         const collaborationElement = document.querySelector("[data-tab=review][data-title=Collaboration]")
         const saveElement = document.getElementById('slot-btn-dt-save');
+        const logoElement = document.getElementById('header-logo');
         const handBurgerElement = document.getElementById('slot-btn-options')
         const aboutElement = document.getElementById('left-btn-about');
         const watermarkElement = document.getElementById('slot-btn-watermark');
@@ -352,6 +353,7 @@
           handBurgerElement.remove();
           aboutElement.remove()
           watermarkElement.parentElement.remove();
+          logoElement.remove()
           removeAddImageByUrl()
         }
       }
