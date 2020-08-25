@@ -124,8 +124,16 @@ window.addEventListener('message', (() =>  {
         console.log(e)
       }
       return;
-    }
-    if (msg.data && msg.data.startsWith('{')) {
+    } else if (msg.data && msg.data.startsWith('DOCY;')) {
+      try {
+        const mime = 'text/plain';
+        var blob = new Blob([msg.data], { type: mime });
+        var url = URL.createObjectURL(blob);
+        msg.source.postMessage(url, '*');
+      } catch (e) {
+        console.log(e);
+      }
+    } else if (msg.data && msg.data.startsWith('{')) {
       let obj = {};
       try {
         obj = JSON.parse(msg.data); 
